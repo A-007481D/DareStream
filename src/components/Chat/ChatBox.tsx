@@ -3,6 +3,7 @@ import { Send, Zap, Smile } from 'lucide-react';
 import { ChatMessage } from '../../types';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useStreamStore } from '../../store/useStreamStore';
+import { Link } from 'react-router-dom';
 
 interface ChatBoxProps {
   streamId: string;
