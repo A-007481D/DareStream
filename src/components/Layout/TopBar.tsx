@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Search, Menu, X, Coins, User } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Search, Menu, X, Coins, User, Settings, LogOut } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useStreamStore } from '../../store/useStreamStore';
+import { signOut } from '../../lib/supabase';
 
 interface TopBarProps {
   onToggleSidebar: () => void;
@@ -11,6 +12,8 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
+  const [showDropdown, setShowDropdown] = useState(false);
   const { searchStreams } = useStreamStore();
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -56,13 +59,50 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleSidebar, isSidebarOpen }
               <span className="text-white font-medium">{user.coins}</span>
             </div>
             
-            {/* User Avatar */}
-            <Link to="/profile" className="flex items-center space-x-2 hover:bg-gray-800 px-3 py-2 rounded-full transition-colors">
-              <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-                <User className="w-4 h-4 text-gray-300" />
-              </div>
-              <span className="text-white text-sm hidden sm:block">{user.username}</span>
-            </Link>
+            {/* User Avatar with Dropdown */}
+            <div className="relative">
+              <button 
+                onClick={() => setShowDropdown(!showDropdown)}
+                className="flex items-center space-x-2 hover:bg-gray-800 px-3 py-2 rounded-full transition-colors"
+              >
+                <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+                  <User className="w-4 h-4 text-gray-300" />
+                </div>
+                <span className="text-white text-sm hidden sm:block">{user.username}</span>
+              </button>
+              
+              {showDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                  <Link
+                    to="/profile"
+                    onClick={() => setShowDropdown(false)}
+                    className="flex items-center px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    Profile
+                  </Link>
+                  <Link
+                    to="/settings"
+                    onClick={() => setShowDropdown(false)}
+                    className="flex items-center px-4 py-2 text-sm text-gray-200 hover:bg-gray-700"
+                  >
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Link>
+                  <button
+                    onClick={async () => {
+                      await signOut(); // This is now imported from supabase
+                      navigate('/');
+                      setShowDropdown(false);
+                    }}
+                    className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           </>
         ) : (
           <div className="flex items-center space-x-3">

@@ -200,7 +200,7 @@ export const StreamView: React.FC = () => {
 
           {/* Chat Sidebar */}
           <div className="lg:col-span-1">
-            <ChatBox streamId={currentStream.id} messages={mockMessages} />
+            <ChatBox messages={mockMessages} />
           </div>
         </div>
 

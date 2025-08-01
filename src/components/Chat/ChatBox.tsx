@@ -6,11 +6,10 @@ import { useStreamStore } from '../../store/useStreamStore';
 import { Link } from 'react-router-dom';
 
 interface ChatBoxProps {
-  streamId: string;
   messages: ChatMessage[];
 }
 
-export const ChatBox: React.FC<ChatBoxProps> = ({ streamId, messages }) => {
+export const ChatBox: React.FC<ChatBoxProps> = ({ messages }) => {
   const [message, setMessage] = useState('');
   const [isPressuring, setIsPressuring] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);

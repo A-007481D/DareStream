@@ -6,6 +6,7 @@ export interface User {
   coins: number;
   created_at: string;
   is_verified: boolean;
+  role?: string;
 }
 
 export interface Dare {

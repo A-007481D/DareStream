@@ -8,6 +8,7 @@ import { StreamView } from './pages/StreamView';
 import { Leaderboard } from './pages/Leaderboard';
 import { Login } from './pages/Auth/Login';
 import { SignUp } from './pages/Auth/SignUp';
+import { Profile } from './pages/Profile';
 import { useAuthStore } from './store/useAuthStore';
 
 function App() {
@@ -38,6 +39,8 @@ function App() {
               <Route path="/dares" element={<DareRoulette />} />
               <Route path="/stream/:id" element={<StreamView />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/settings" element={<div className="text-white p-4">Settings Page - Coming Soon</div>} />
             </Routes>
           </Layout>
         } />

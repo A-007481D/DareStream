@@ -11,7 +11,7 @@ interface AuthState {
   logout: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
+export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   loading: true,
   setUser: (user) => set({ user }),
@@ -40,7 +40,17 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
   logout: async () => {
-    await supabase.auth.signOut();
-    set({ user: null });
+    try {
+      // Clear the user state immediately to prevent any UI flicker
+      set({ user: null });
+      // Then sign out from Supabase
+      await supabase.auth.signOut();
+      // Force a full page reload to clear any state that might trigger API calls
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error logging out:', error);
+      // Still redirect even if there's an error
+      window.location.href = '/';
+    }
   },
 }));
