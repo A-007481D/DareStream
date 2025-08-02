@@ -9,6 +9,8 @@ interface AuthState {
   setLoading: (loading: boolean) => void;
   initialize: () => Promise<void>;
   logout: () => Promise<void>;
+  updateTokens: (amount: number) => void;
+  deductTokens: (amount: number) => boolean;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -20,18 +22,28 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const user = await getCurrentUser();
       if (user) {
-        // Mock user data for demo - in real app would fetch from Supabase
-        const mockUser: User = {
-          id: user.id,
-          username: user.user_metadata?.username || 'User',
-          email: user.email || '',
-          coins: 1000, // Starting coins
-          tokens: 1000, // Starting tokens
-          created_at: new Date().toISOString(),
-          is_verified: false,
-        };
+        // Try to get user data from localStorage first
+        const storedUserData = localStorage.getItem(`user_${user.id}`);
+        let userData;
         
-        set({ user: mockUser, loading: false });
+        if (storedUserData) {
+          userData = JSON.parse(storedUserData);
+        } else {
+          // Mock user data for demo - in real app would fetch from Supabase
+          userData = {
+            id: user.id,
+            username: user.user_metadata?.username || 'User',
+            email: user.email || '',
+            coins: 1000, // Starting coins
+            tokens: 1000, // Starting tokens
+            created_at: new Date().toISOString(),
+            is_verified: false,
+          };
+          // Store initial data
+          localStorage.setItem(`user_${user.id}`, JSON.stringify(userData));
+        }
+        
+        set({ user: userData, loading: false });
       } else {
         set({ user: null, loading: false });
       }
@@ -62,5 +74,41 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Still force redirect even if there was an error
       window.location.replace('/');
     }
+  },
+  updateTokens: (amount: number) => {
+    set((state) => {
+      if (!state.user) return state;
+      
+      const updatedUser = {
+        ...state.user,
+        tokens: (state.user.tokens || 0) + amount
+      };
+      
+      // Persist to localStorage
+      localStorage.setItem(`user_${state.user.id}`, JSON.stringify(updatedUser));
+      
+      return { user: updatedUser };
+    });
+  },
+  deductTokens: (amount: number) => {
+    let success = false;
+    set((state) => {
+      if (!state.user || (state.user.tokens || 0) < amount) {
+        success = false;
+        return state;
+      }
+      
+      const updatedUser = {
+        ...state.user,
+        tokens: (state.user.tokens || 0) - amount
+      };
+      
+      // Persist to localStorage
+      localStorage.setItem(`user_${state.user.id}`, JSON.stringify(updatedUser));
+      
+      success = true;
+      return { user: updatedUser };
+    });
+    return success;
   },
 }));

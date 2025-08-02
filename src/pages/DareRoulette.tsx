@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Zap, TrendingUp, Clock, Users } from 'lucide-react';
+import { Zap, TrendingUp, Clock, Users, Vote, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/useAuthStore';
+import { Button } from '../components/ui/Button';
 
 export const DareRoulette: React.FC = () => {
   const { user } = useAuthStore();
@@ -24,6 +25,9 @@ export const DareRoulette: React.FC = () => {
       submittedBy: 'DareKing',
       timeLeft: '2h 15m',
       category: 'Physical',
+      votes: 23,
+      reactions: ['🔥', '💀', '😱'],
+      multiplier: 1.5
     },
     {
       id: '2',
@@ -33,6 +37,9 @@ export const DareRoulette: React.FC = () => {
       submittedBy: 'HeatLover',
       timeLeft: '45m',
       category: 'Food',
+      votes: 18,
+      reactions: ['🌶️', '😵', '🔥'],
+      multiplier: 1.2
     },
     {
       id: '3',
@@ -42,8 +49,14 @@ export const DareRoulette: React.FC = () => {
       submittedBy: 'BrainPower',
       timeLeft: '1h 30m',
       category: 'Mental',
+      votes: 31,
+      reactions: ['🧠', '💯', '🤯'],
+      multiplier: 2.0
     },
   ];
+
+  const [votedDares, setVotedDares] = useState<Set<string>>(new Set());
+  const [contributedDares, setContributedDares] = useState<Set<string>>(new Set());
 
   return (
     <div className="min-h-screen bg-black">
@@ -128,7 +141,7 @@ export const DareRoulette: React.FC = () => {
           
           <div className="space-y-4">
             {pendingDares.map((dare) => (
-              <div key={dare.id} className="bg-gray-900 rounded-lg p-6 hover:bg-gray-800 transition-colors">
+              <div key={dare.id} className="bg-gray-900 rounded-lg p-6 hover:bg-gray-800 transition-colors border border-gray-700">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
                     <div className="flex items-center space-x-3 mb-2">
@@ -136,6 +149,11 @@ export const DareRoulette: React.FC = () => {
                       <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-medium">
                         {dare.category}
                       </span>
+                      {dare.multiplier > 1 && (
+                        <span className="bg-yellow-600 text-black px-2 py-1 rounded text-xs font-bold">
+                          {dare.multiplier}x MULTIPLIER
+                        </span>
+                      )}
                     </div>
                     <p className="text-gray-300 mb-3">{dare.description}</p>
                     <div className="flex items-center space-x-4 text-sm text-gray-400">
@@ -144,16 +162,70 @@ export const DareRoulette: React.FC = () => {
                         <Clock className="w-4 h-4 mr-1" />
                         {dare.timeLeft} left
                       </div>
+                      <div className="flex items-center">
+                        <Vote className="w-4 h-4 mr-1" />
+                        {dare.votes} votes
+                      </div>
                     </div>
+                    
+                    {/* Reactions */}
+                    {dare.reactions && (
+                      <div className="flex items-center space-x-2 mt-2">
+                        {dare.reactions.map((emoji, index) => (
+                          <span key={index} className="text-lg">{emoji}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   
                   <div className="text-right">
                     <div className="text-2xl font-bold text-yellow-400 mb-2">
-                      {dare.reward} tokens
+                      {Math.round(dare.reward * (dare.multiplier || 1))} tokens
                     </div>
-                    <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                      Watch Stream
-                    </button>
+                    {dare.reward !== Math.round(dare.reward * (dare.multiplier || 1)) && (
+                      <div className="text-xs text-gray-400 mb-2">
+                        Base: {dare.reward} tokens
+                      </div>
+                    )}
+                    
+                    <div className="space-y-2">
+                      <Button size="sm" className="w-full text-xs">
+                        Watch Stream
+                      </Button>
+                      
+                      {user && (
+                        <div className="flex space-x-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (!votedDares.has(dare.id)) {
+                                setVotedDares(prev => new Set([...prev, dare.id]));
+                              }
+                            }}
+                            disabled={votedDares.has(dare.id)}
+                            className="flex-1 text-xs"
+                          >
+                            <Vote className="w-3 h-3 mr-1" />
+                            {votedDares.has(dare.id) ? 'Voted' : 'Vote'}
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              if (!contributedDares.has(dare.id)) {
+                                setContributedDares(prev => new Set([...prev, dare.id]));
+                              }
+                            }}
+                            className="flex-1 text-xs bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
+                          >
+                            <Zap className="w-3 h-3 mr-1" />
+                            +Tokens
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
