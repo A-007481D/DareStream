@@ -21,7 +21,7 @@ interface StreamCardProps {
 
 export const StreamCard: React.FC<StreamCardProps> = ({ stream }) => {
   return (
-    <Link to={`/stream/${stream.id}`} className="group block cursor-pointer">
+    <Link to={`/watch/${stream.id}`} className="group block cursor-pointer">
       <div className="bg-gray-900 rounded-lg overflow-hidden hover:scale-105 transition-all duration-200 relative">
         <div className="aspect-video relative overflow-hidden">
           <img 

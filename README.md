@@ -30,14 +30,17 @@ A viral live streaming platform where users submit, vote on, and perform challen
 - **Animations**: Framer Motion
 - **Icons**: Lucide React
 - **Build Tool**: Vite
+- **Live Streaming**: LiveKit WebRTC
+- **Real-time**: Socket.IO
 
 ### Planned Integrations
 - **Database**: Supabase (PostgreSQL + Real-time)
 - **Authentication**: Supabase Auth
-- **Live Streaming**: Agora.io WebRTC
+- **Live Streaming**: LiveKit WebRTC ✅
 - **Payments**: Stripe (disabled for demo)
 - **Video Processing**: FFmpeg.wasm
 - **Moderation**: Content filtering APIs
+- **Real-time Events**: Socket.IO ✅
 
 ## 🚀 Getting Started
 
@@ -68,7 +71,15 @@ cp .env.example .env
 npm run dev
 ```
 
+5. Start the real-time server:
+```bash
+cd server
+npm install
+npm run dev
+```
+
 The app will be available at `http://localhost:5173`
+The server will be available at `http://localhost:3001`
 
 ## 📱 Features Overview
 
@@ -131,6 +142,13 @@ The app will be available at `http://localhost:5173`
 npm run build
 ```
 
+### Server Deployment
+The Node.js server can be deployed to any platform that supports Node.js:
+- Heroku
+- Railway
+- DigitalOcean
+- AWS EC2
+
 ### Deploy to Netlify/Vercel
 The app is ready for deployment to any static hosting service.
 
@@ -163,8 +181,9 @@ This project is licensed under the MIT License.
 
 ## 🎯 Roadmap
 
+- [x] Live streaming with LiveKit WebRTC
+- [x] Real-time events with Socket.IO
 - [ ] Supabase integration
-- [ ] Live streaming with Agora.io
 - [ ] Payment processing with Stripe
 - [ ] Mobile app development
 - [ ] Advanced moderation tools

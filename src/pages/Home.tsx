@@ -108,7 +108,7 @@ export const Home: React.FC = () => {
               
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link
-                  to="/stream/1"
+                  to="/watch/1"
                   className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-medium transition-colors flex items-center justify-center"
                 >
                   <Play className="w-5 h-5 mr-2" />

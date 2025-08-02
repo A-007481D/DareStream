@@ -10,6 +10,8 @@ import { Login } from './pages/Auth/Login';
 import { SignUp } from './pages/Auth/SignUp';
 import { Profile } from './pages/Profile';
 import TokensPage from './pages/Tokens';
+import { GoLive } from './pages/GoLive';
+import { WatchStream } from './pages/WatchStream';
 import { useAuthStore } from './store/useAuthStore';
 
 function App() {
@@ -48,6 +50,8 @@ function App() {
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/tokens" element={<TokensPage />} />
+              <Route path="/go-live" element={<GoLive />} />
+              <Route path="/watch/:id" element={<WatchStream />} />
               <Route path="/settings" element={<div className="text-white p-4">Settings Page - Coming Soon</div>} />
             </Routes>
           </Layout>

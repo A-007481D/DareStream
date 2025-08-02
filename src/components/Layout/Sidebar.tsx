@@ -11,7 +11,8 @@ import {
   HelpCircle,
   ChevronDown,
   Circle,
-  Coins
+  Coins,
+  Video
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -29,6 +30,7 @@ export const Sidebar: React.FC = () => {
     { name: 'Following', href: '/following', icon: Heart },
     { name: 'Leaderboard', href: '/leaderboard', icon: Trophy },
     { name: 'Dare Roulette', href: '/dares', icon: Zap },
+    { name: 'Go Live', href: '/go-live', icon: Video },
   ];
 
   // Mock recommended streamers
