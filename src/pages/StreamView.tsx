@@ -4,6 +4,9 @@ import { Eye, Share, Gift, ArrowLeft, UserPlus, UserCheck } from 'lucide-react';
 import { ChatBox } from '../components/Chat/ChatBox';
 import { DareSubmissionModal } from '../components/Dare/DareSubmissionModal';
 import { StreamReactions } from '../components/Stream/StreamReactions';
+import { DareQueue } from '../components/Dare/DareQueue';
+import { StreamGoals } from '../components/Dare/StreamGoals';
+import { DareAlerts } from '../components/Dare/DareAlerts';
 import { useStreamStore } from '../store/useStreamStore';
 import { useAuthStore } from '../store/useAuthStore';
 
@@ -15,6 +18,7 @@ export const StreamView: React.FC = () => {
   const [tipAmount, setTipAmount] = useState(5);
   const [tipMessage, setTipMessage] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'chat' | 'dares' | 'goals'>('chat');
 
   const { currentStream, setCurrentStream } = useStreamStore();
   const { user } = useAuthStore();
@@ -200,7 +204,46 @@ export const StreamView: React.FC = () => {
 
           {/* Chat Sidebar */}
           <div className="lg:col-span-1">
-            <ChatBox messages={mockMessages} />
+            {/* Tab Navigation */}
+            <div className="flex bg-gray-900 rounded-t-lg">
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`flex-1 px-4 py-3 text-sm font-medium rounded-tl-lg transition-colors ${
+                  activeTab === 'chat'
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Chat
+              </button>
+              <button
+                onClick={() => setActiveTab('dares')}
+                className={`flex-1 px-4 py-3 text-sm font-medium transition-colors ${
+                  activeTab === 'dares'
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Dares
+              </button>
+              <button
+                onClick={() => setActiveTab('goals')}
+                className={`flex-1 px-4 py-3 text-sm font-medium rounded-tr-lg transition-colors ${
+                  activeTab === 'goals'
+                    ? 'bg-gray-800 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                }`}
+              >
+                Goals
+              </button>
+            </div>
+
+            {/* Tab Content */}
+            <div className="bg-gray-900 rounded-b-lg">
+              {activeTab === 'chat' && <ChatBox messages={mockMessages} />}
+              {activeTab === 'dares' && <DareQueue streamId={currentStream.id} />}
+              {activeTab === 'goals' && <StreamGoals streamId={currentStream.id} />}
+            </div>
           </div>
         </div>
 
@@ -281,6 +324,9 @@ export const StreamView: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Dare Alerts */}
+      <DareAlerts streamId={currentStream.id} />
     </div>
   );
 };

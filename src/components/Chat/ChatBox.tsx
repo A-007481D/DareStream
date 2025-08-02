@@ -13,11 +13,13 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ messages }) => {
   const [message, setMessage] = useState('');
   const [isPressuring, setIsPressuring] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { user } = useAuthStore();
   const { pressureMeter, increasePressure } = useStreamStore();
 
   const quickEmojis = ['💀', '🔥', '😱', '💯', '⚡', '🤯', '👏', '❤️', '😂', '🙌'];
+  const dareReactions = ['🔥', '💀', '😱', '💯', '⚡', '🤯', '👏', '❤️'];
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -43,6 +45,18 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ messages }) => {
     
     setTimeout(() => {
       setIsPressuring(false);
+    }, 1000);
+  };
+
+  const handleDareReaction = (emoji: string) => {
+    if (!user) return;
+    
+    setSelectedReaction(emoji);
+    console.log('Dare reaction:', emoji);
+    
+    // Reset after animation
+    setTimeout(() => {
+      setSelectedReaction(null);
     }, 1000);
   };
 
@@ -73,6 +87,32 @@ export const ChatBox: React.FC<ChatBoxProps> = ({ messages }) => {
             className="bg-gradient-to-r from-yellow-500 to-red-600 h-2 rounded-full transition-all duration-300"
             style={{ width: `${pressureMeter}%` }}
           />
+        </div>
+      </div>
+
+      {/* Dare Reactions */}
+      <div className="p-4 border-t border-gray-700">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-gray-300 text-sm font-medium">Quick Dare Reactions</span>
+          <span className="text-xs text-gray-500">React to the current dare</span>
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {dareReactions.map((emoji) => (
+            <button
+              key={emoji}
+              onClick={() => handleDareReaction(emoji)}
+              disabled={!user}
+              className={`p-2 rounded-lg text-xl transition-all hover:scale-110 ${
+                selectedReaction === emoji 
+                  ? 'bg-red-600 scale-110' 
+                  : user 
+                    ? 'bg-gray-800 hover:bg-gray-700' 
+                    : 'bg-gray-800 opacity-50 cursor-not-allowed'
+              }`}
+            >
+              {emoji}
+            </button>
+          ))}
         </div>
       </div>
 

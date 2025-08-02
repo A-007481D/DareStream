@@ -17,11 +17,17 @@ export const DareSubmissionModal: React.FC<DareSubmissionModalProps> = ({ stream
   });
 
   const categories = [
-    { value: 'physical', label: 'Physical Challenge' },
-    { value: 'mental', label: 'Mental Challenge' },
-    { value: 'creative', label: 'Creative Challenge' },
-    { value: 'food', label: 'Food Challenge' },
-    { value: 'extreme', label: 'Extreme Challenge' },
+    { value: 'physical', label: 'Physical Challenge', difficulty: 'wild' },
+    { value: 'mental', label: 'Mental Challenge', difficulty: 'mild' },
+    { value: 'creative', label: 'Creative Challenge', difficulty: 'mild' },
+    { value: 'food', label: 'Food Challenge', difficulty: 'wild' },
+    { value: 'extreme', label: 'Extreme Challenge', difficulty: 'extreme' },
+  ];
+
+  const difficultyTiers = [
+    { value: 'mild', label: 'Mild', minTokens: 25, color: 'text-green-400' },
+    { value: 'wild', label: 'Wild', minTokens: 100, color: 'text-orange-400' },
+    { value: 'extreme', label: 'Extreme', minTokens: 250, color: 'text-red-400' },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -99,10 +105,62 @@ export const DareSubmissionModal: React.FC<DareSubmissionModalProps> = ({ stream
 
           <div>
             <label className="block text-gray-300 text-sm font-medium mb-2">
+              Difficulty Tier
+            </label>
+            <div className="grid grid-cols-3 gap-2 mb-3">
+              {difficultyTiers.map((tier) => (
+                <button
+                  key={tier.value}
+                  type="button"
+                  onClick={() => setDare({ 
+                    ...dare, 
+                    difficulty: tier.value as any,
+                    reward: Math.max(dare.reward, tier.minTokens)
+                  })}
+                  className={`p-3 rounded-lg border-2 transition-colors text-center ${
+                    dare.difficulty === tier.value
+                      ? 'border-red-500 bg-red-500/10'
+                      : 'border-gray-700 hover:border-gray-600'
+                  }`}
+                >
+                  <div className={`font-bold ${tier.color}`}>{tier.label}</div>
+                  <div className="text-xs text-gray-400">{tier.minTokens}+ tokens</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
+              Time Limit (optional)
+            </label>
+            <select
+              value={dare.time_limit || ''}
+              onChange={(e) => setDare({ ...dare, time_limit: e.target.value ? parseInt(e.target.value) : undefined })}
+              className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+            >
+              <option value="">No time limit</option>
+              <option value="5">5 minutes</option>
+              <option value="10">10 minutes</option>
+              <option value="15">15 minutes</option>
+              <option value="30">30 minutes</option>
+              <option value="60">1 hour</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-gray-300 text-sm font-medium mb-2">
               Reward (tokens)
             </label>
+            <div className="text-xs text-gray-400 mb-2">
+              Minimum for {dare.difficulty || 'mild'}: {
+                difficultyTiers.find(t => t.value === (dare.difficulty || 'mild'))?.minTokens || 25
+              } tokens
+            </div>
             <div className="flex space-x-2 mb-3">
-              {[25, 50, 100, 250, 500].map((amount) => (
+              {[25, 50, 100, 250, 500].filter(amount => 
+                amount >= (difficultyTiers.find(t => t.value === (dare.difficulty || 'mild'))?.minTokens || 25)
+              ).map((amount) => (
                 <button
                   key={amount}
                   type="button"
@@ -119,10 +177,13 @@ export const DareSubmissionModal: React.FC<DareSubmissionModalProps> = ({ stream
             </div>
             <input
               type="number"
-              min="10"
+              min={difficultyTiers.find(t => t.value === (dare.difficulty || 'mild'))?.minTokens || 25}
               max="1000"
               value={dare.reward}
-              onChange={(e) => setDare({ ...dare, reward: parseInt(e.target.value) || 10 })}
+              onChange={(e) => {
+                const minTokens = difficultyTiers.find(t => t.value === (dare.difficulty || 'mild'))?.minTokens || 25;
+                setDare({ ...dare, reward: Math.max(parseInt(e.target.value) || minTokens, minTokens) });
+              }}
               className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>

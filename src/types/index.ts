@@ -17,16 +17,65 @@ export interface Dare {
   id: string;
   title: string;
   description: string;
-  difficulty: 'easy' | 'medium' | 'hard' | 'extreme';
+  difficulty: 'mild' | 'wild' | 'extreme';
   cost: number;
   votes: number;
-  status: 'pending' | 'active' | 'completed' | 'rejected';
+  status: 'pending' | 'approved' | 'active' | 'completed' | 'rejected';
   created_by: string;
+  created_by_username?: string;
   created_at: string;
   performer_id?: string;
   stream_id?: string;
   category?: string;
   reward?: number;
+  time_limit?: number; // in minutes
+  priority_score?: number;
+  total_contributions?: number;
+  contributors?: DareContributor[];
+  reactions?: DareReaction[];
+  moderation_notes?: string;
+  completed_at?: string;
+  completion_time?: number; // actual time taken in seconds
+  engagement_stats?: {
+    views: number;
+    reactions: number;
+    chat_messages: number;
+  };
+}
+
+export interface DareContributor {
+  user_id: string;
+  username: string;
+  amount: number;
+  created_at: string;
+}
+
+export interface DareReaction {
+  id: string;
+  dare_id: string;
+  user_id: string;
+  emoji: string;
+  created_at: string;
+}
+
+export interface StreamGoal {
+  id: string;
+  stream_id: string;
+  title: string;
+  description: string;
+  target_amount: number;
+  current_amount: number;
+  status: 'active' | 'completed' | 'cancelled';
+  reward_description: string;
+  created_at: string;
+  completed_at?: string;
+}
+
+export interface DareVote {
+  id: string;
+  dare_id: string;
+  user_id: string;
+  created_at: string;
 }
 
 export interface Stream {
