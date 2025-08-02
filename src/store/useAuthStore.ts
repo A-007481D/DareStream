@@ -25,7 +25,8 @@ export const useAuthStore = create<AuthState>((set) => ({
           id: user.id,
           username: user.user_metadata?.username || 'User',
           email: user.email || '',
-          coins: 1000, // Starting tokens
+          coins: 1000, // Starting coins
+          tokens: 1000, // Starting tokens
           created_at: new Date().toISOString(),
           is_verified: false,
         };

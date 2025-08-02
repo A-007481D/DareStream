@@ -4,9 +4,13 @@ export interface User {
   email: string;
   avatar_url?: string;
   coins: number;
+  tokens: number;
   created_at: string;
   is_verified: boolean;
   role?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
 }
 
 export interface Dare {

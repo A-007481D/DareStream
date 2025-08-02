@@ -10,7 +10,8 @@ import {
   Settings,
   HelpCircle,
   ChevronDown,
-  Circle
+  Circle,
+  Coins
 } from 'lucide-react';
 import { useAuthStore } from '../../store/useAuthStore';
 
@@ -132,26 +133,55 @@ export const Sidebar: React.FC = () => {
         </div>
       </nav>
 
-      {/* User Section */}
-      <div className="p-4 border-t border-gray-800">
+      {/* User Section with Token Balance */}
+      <div className="p-4 border-t border-gray-800 mt-auto">
         {user ? (
           <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center">
-                <User className="w-5 h-5 text-gray-300" />
+            {/* Token Balance */}
+            <Link 
+              to="/tokens" 
+              className="flex items-center justify-between p-3 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors"
+            >
+              <div className="flex items-center space-x-2">
+                <div className="p-1.5 rounded-full bg-yellow-500/10">
+                  <Coins className="w-4 h-4 text-yellow-400" />
+                </div>
+                <span className="text-sm font-medium text-white">My Tokens</span>
+              </div>
+              <div className="flex items-center space-x-1">
+                <span className="text-sm font-bold text-yellow-400">
+                  {user?.tokens?.toLocaleString() || '0'}
+                </span>
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              </div>
+            </Link>
+
+            {/* Profile Link */}
+            <Link 
+              to="/profile" 
+              className={`flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-800 ${isActive('/profile') ? 'bg-gray-800' : ''}`}
+            >
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
+                <User className="w-4 h-4 text-gray-300" />
               </div>
               <div className="flex-1 min-w-0">
-                <div className="text-white font-medium truncate">{user.username}</div>
-                <div className="text-gray-400 text-sm">{user.coins} tokens</div>
+                <p className="text-sm font-medium text-white truncate">{user?.username || 'User'}</p>
+                <p className="text-xs text-gray-400 truncate">View Profile</p>
               </div>
-            </div>
-            
-            <div className="flex space-x-2">
-              <button className="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm transition-colors">
-                <Settings className="w-4 h-4 mx-auto" />
-              </button>
-              <button className="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm transition-colors">
-                <HelpCircle className="w-4 h-4 mx-auto" />
+            </Link>
+
+            {/* Settings and Help */}
+            <div className="flex space-x-2 pt-2">
+              <Link 
+                to="/settings" 
+                className="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center"
+              >
+                <Settings className="w-4 h-4 mr-1" />
+                <span>Settings</span>
+              </Link>
+              <button className="flex-1 bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-lg text-sm transition-colors flex items-center justify-center">
+                <HelpCircle className="w-4 h-4 mr-1" />
+                <span>Help</span>
               </button>
             </div>
           </div>

@@ -2,30 +2,28 @@ import { useState, useEffect } from 'react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useNavigate, Link } from 'react-router-dom';
 import { 
-  User, Settings, LogOut, Edit3, Video, Share2, Users, Award, 
-  UserPlus, Star, Zap, BarChart2, Clock, Trophy, Activity, 
-  Trophy as TrophyIcon, UserCheck, MessageSquare, Bell, Plus, Search, Filter
+  Edit3, Video, Share2, Users, UserPlus, Star, Zap, 
+  BarChart2, Clock, Trophy, Activity, Award, Settings, LogOut,
+  Trophy as TrophyIcon, User, UserCheck, MessageSquare, Plus
 } from 'lucide-react';
 import { signOut } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
-import { cn } from '../lib/utils';
 import { StatCard } from '../components/Profile/StatCard';
 import { TabButton } from '../components/Profile/TabButton';
 import { ActivityItem } from '../components/Profile/ActivityItem';
 import { Section } from '../components/Profile/Section';
 
-// Mock data - in a real app, this would come from your backend
-// Mock data - in a real app, this would come from your backend
-const mockStats = {
+// User stats - in a real app, this would come from your backend
+const getUserStats = () => ({
   followers: 1243,
   following: 542,
   streams: 28,
-  totalEarned: 1250,
+  totalEarned: 12450,
   rating: 4.8,
   challengesCompleted: 42,
   challengesWon: 28,
   currentStreak: 12,
-};
+});
 
 const recentAchievements = [
   { id: 1, name: 'Dare Master', icon: <TrophyIcon className="w-5 h-5 text-yellow-500" /> },
@@ -71,19 +69,24 @@ export const Profile: React.FC = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditing, setIsEditing] = useState(false);
+  
+  // Get user stats
+  const userStats = getUserStats();
+  const { followers, following, streams: totalStreams, totalEarned } = userStats;
+
   const [profileData, setProfileData] = useState({
     username: user?.username || 'DareDevil123',
     bio: 'Daredevil and challenge enthusiast! Love pushing my limits and taking on new challenges.',
     location: 'New York, USA',
     website: 'daredevil.example.com',
-    followers: 1243,
-    following: 542,
-    streams: 28,
-    totalEarned: 1250,
-    rating: 4.8,
-    challengesCompleted: 42,
-    challengesWon: 28,
-    currentStreak: 12,
+    followers,
+    following,
+    streams: totalStreams,
+    totalEarned,
+    rating: userStats.rating,
+    challengesCompleted: userStats.challengesCompleted,
+    challengesWon: userStats.challengesWon,
+    currentStreak: userStats.currentStreak,
   });
   
   // Close dropdown when clicking outside
@@ -246,23 +249,33 @@ export const Profile: React.FC = () => {
               </div>
               
               <div className="mb-4">
-                <h1 className="text-2xl md:text-3xl font-bold">
-                  {isEditing ? (
-                    <input
-                      type="text"
-                      name="username"
-                      value={profileData.username}
-                      onChange={handleInputChange}
-                      className="bg-gray-800 text-white border-b border-gray-600 focus:outline-none focus:border-red-500"
-                    />
-                  ) : (
-                    user.username
-                  )}
-                </h1>
-                <p className="text-gray-400 flex items-center">
-                  <Star className="w-4 h-4 text-yellow-500 mr-1" />
-                  {profileData.rating.toFixed(1)} Rating
-                </p>
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-3">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="username"
+                        value={profileData.username}
+                        onChange={handleInputChange}
+                        className="text-2xl md:text-3xl font-bold bg-transparent border-b border-gray-600 focus:outline-none focus:border-red-500"
+                      />
+                    ) : (
+                      <h1 className="text-2xl md:text-3xl font-bold">{user.username}</h1>
+                    )}
+                    <Link 
+                      to="/tokens" 
+                      className="flex items-center space-x-1 bg-gray-800 hover:bg-gray-700 px-3 py-1 rounded-full text-sm transition-colors"
+                    >
+                      <Zap className="w-4 h-4 text-yellow-400" />
+                      <span className="font-medium">{user.tokens?.toLocaleString() || '0'}</span>
+                      <span className="text-gray-400">Tokens</span>
+                    </Link>
+                  </div>
+                  <p className="text-gray-400 flex items-center">
+                    <Star className="w-4 h-4 text-yellow-500 mr-1" />
+                    {profileData.rating.toFixed(1)} Rating
+                  </p>
+                </div>
                 
                 {isEditing ? (
                   <div className="mt-2 space-y-2">
