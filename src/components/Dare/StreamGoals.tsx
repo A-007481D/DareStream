@@ -104,42 +104,44 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
   const completedGoals = goals.filter(g => g.status === 'completed');
 
   return (
-    <div className="bg-gray-900 rounded-lg p-6">
+    <div className="h-full flex flex-col p-3 sm:p-4">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
-          <Target className="w-6 h-6 text-red-500" />
-          <h2 className="text-xl font-bold text-white">Stream Goals</h2>
+          <Target className="w-5 h-5 sm:w-6 sm:h-6 text-red-500" />
+          <h2 className="text-lg sm:text-xl font-bold text-white">Stream Goals</h2>
         </div>
         {isStreamer && (
           <Button
             size="sm"
             onClick={() => setShowCreateModal(true)}
-            className="text-xs"
+            className="text-xs px-2 py-1"
           >
-            <Plus className="w-4 h-4 mr-1" />
-            Add Goal
+            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+            <span className="hidden sm:inline">Add Goal</span>
+            <span className="sm:hidden">Add</span>
           </Button>
         )}
       </div>
 
       {/* Active Goals */}
+      <div className="flex-1 overflow-y-auto min-h-0">
       {activeGoals.length > 0 && (
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-white mb-4">Active Goals</h3>
-          <div className="space-y-4">
+        <div className="mb-6 sm:mb-8">
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4">Active Goals</h3>
+          <div className="space-y-3 sm:space-y-4">
             {activeGoals.map(goal => (
-              <div key={goal.id} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+              <div key={goal.id} className="bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-700">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1">
-                    <h4 className="text-white font-bold text-lg mb-1">{goal.title}</h4>
-                    <p className="text-gray-300 text-sm mb-2">{goal.description}</p>
+                    <h4 className="text-white font-bold text-sm sm:text-lg mb-1">{goal.title}</h4>
+                    <p className="text-gray-300 text-xs sm:text-sm mb-2">{goal.description}</p>
                     <div className="flex items-center space-x-2 text-xs text-gray-400">
-                      <Gift className="w-3 h-3" />
+                      <Gift className="w-3 h-3 sm:w-4 sm:h-4" />
                       <span>Reward: {goal.reward_description}</span>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-lg font-bold text-white">
+                    <div className="text-sm sm:text-lg font-bold text-white">
                       {goal.current_amount} / {goal.target_amount}
                     </div>
                     <div className="text-xs text-gray-400">tokens</div>
@@ -166,15 +168,15 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                  <div className="flex items-center space-x-1 sm:space-x-2">
                     {user && !isStreamer && (
                       <>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleContribute(goal.id, 50)}
-                          className="text-xs bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
+                          className="text-xs px-2 py-1 bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
                         >
                           <Zap className="w-3 h-3 mr-1" />
                           +50
@@ -183,7 +185,7 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
                           size="sm"
                           variant="outline"
                           onClick={() => handleContribute(goal.id, 100)}
-                          className="text-xs bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
+                          className="text-xs px-2 py-1 bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
                         >
                           <Zap className="w-3 h-3 mr-1" />
                           +100
@@ -192,7 +194,7 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
                           size="sm"
                           variant="outline"
                           onClick={() => handleContribute(goal.id, 250)}
-                          className="text-xs bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
+                          className="text-xs px-2 py-1 bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
                         >
                           <Zap className="w-3 h-3 mr-1" />
                           +250
@@ -202,14 +204,14 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
                   </div>
                   
                   {isStreamer && (
-                    <div className="flex items-center space-x-2">
-                      <Button size="sm" variant="ghost" className="text-xs">
+                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <Button size="sm" variant="ghost" className="text-xs px-2 py-1">
                         <Edit3 className="w-3 h-3 mr-1" />
-                        Edit
+                        <span className="hidden sm:inline">Edit</span>
                       </Button>
-                      <Button size="sm" variant="ghost" className="text-xs text-red-400">
+                      <Button size="sm" variant="ghost" className="text-xs px-2 py-1 text-red-400">
                         <Trash2 className="w-3 h-3 mr-1" />
-                        Delete
+                        <span className="hidden sm:inline">Delete</span>
                       </Button>
                     </div>
                   )}
@@ -223,20 +225,20 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
       {/* Completed Goals */}
       {completedGoals.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-            <TrendingUp className="w-5 h-5 mr-2 text-green-500" />
+          <h3 className="text-base sm:text-lg font-semibold text-white mb-3 sm:mb-4 flex items-center">
+            <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 mr-2 text-green-500" />
             Completed Goals
           </h3>
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {completedGoals.map(goal => (
-              <div key={goal.id} className="bg-gray-800/50 rounded-lg p-3 border border-green-500/20">
+              <div key={goal.id} className="bg-gray-800/50 rounded-lg p-2 sm:p-3 border border-green-500/20">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-white font-medium">{goal.title}</h4>
-                    <p className="text-green-400 text-sm">✓ {goal.reward_description}</p>
+                    <h4 className="text-white font-medium text-sm sm:text-base">{goal.title}</h4>
+                    <p className="text-green-400 text-xs sm:text-sm">✓ {goal.reward_description}</p>
                   </div>
                   <div className="text-right">
-                    <div className="text-green-400 font-bold">
+                    <div className="text-green-400 font-bold text-sm sm:text-base">
                       {goal.target_amount} tokens
                     </div>
                     <div className="text-xs text-gray-400">
@@ -249,13 +251,14 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
           </div>
         </div>
       )}
+      </div>
 
       {/* Empty State */}
       {activeGoals.length === 0 && completedGoals.length === 0 && (
-        <div className="text-center py-8 text-gray-400">
-          <Target className="w-12 h-12 mx-auto mb-4 text-gray-600" />
-          <div className="text-lg mb-2">No stream goals yet</div>
-          <p className="text-sm">
+        <div className="text-center py-6 sm:py-8 text-gray-400 flex-1 flex flex-col justify-center">
+          <Target className="w-8 h-8 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 text-gray-600" />
+          <div className="text-base sm:text-lg mb-2">No stream goals yet</div>
+          <p className="text-xs sm:text-sm">
             {isStreamer 
               ? 'Create your first goal to engage your audience!'
               : 'The streamer hasn\'t set any goals yet.'
@@ -266,15 +269,15 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
 
       {/* Create Goal Modal */}
       {showCreateModal && isStreamer && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
           <div className="bg-gray-900 rounded-lg max-w-md w-full">
-            <div className="p-6 border-b border-gray-700">
-              <h3 className="text-xl font-bold text-white">Create Stream Goal</h3>
+            <div className="p-4 sm:p-6 border-b border-gray-700">
+              <h3 className="text-lg sm:text-xl font-bold text-white">Create Stream Goal</h3>
             </div>
             
-            <form onSubmit={handleCreateGoal} className="p-6 space-y-4">
+            <form onSubmit={handleCreateGoal} className="p-4 sm:p-6 space-y-4">
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-300 text-xs sm:text-sm font-medium mb-2">
                   Goal Title
                 </label>
                 <input
@@ -282,26 +285,26 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
                   value={newGoal.title}
                   onChange={(e) => setNewGoal({ ...newGoal, title: e.target.value })}
                   placeholder="e.g., Hair Dye Challenge"
-                  className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full bg-gray-800 text-white px-3 sm:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-300 text-xs sm:text-sm font-medium mb-2">
                   Description
                 </label>
                 <textarea
                   value={newGoal.description}
                   onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
                   placeholder="Describe what happens when the goal is reached..."
-                  className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 h-20 resize-none"
+                  className="w-full bg-gray-800 text-white px-3 sm:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 h-16 sm:h-20 resize-none text-sm"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-300 text-xs sm:text-sm font-medium mb-2">
                   Target Amount (tokens)
                 </label>
                 <input
@@ -310,13 +313,13 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
                   max="10000"
                   value={newGoal.target_amount}
                   onChange={(e) => setNewGoal({ ...newGoal, target_amount: parseInt(e.target.value) || 100 })}
-                  className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full bg-gray-800 text-white px-3 sm:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-gray-300 text-sm font-medium mb-2">
+                <label className="block text-gray-300 text-xs sm:text-sm font-medium mb-2">
                   Reward Description
                 </label>
                 <input
@@ -324,12 +327,12 @@ export const StreamGoals: React.FC<StreamGoalsProps> = ({ streamId, isStreamer =
                   value={newGoal.reward_description}
                   onChange={(e) => setNewGoal({ ...newGoal, reward_description: e.target.value })}
                   placeholder="e.g., Pink hair for a week"
-                  className="w-full bg-gray-800 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full bg-gray-800 text-white px-3 sm:px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-sm"
                   required
                 />
               </div>
 
-              <div className="flex space-x-4 pt-4">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 pt-4">
                 <Button type="submit" className="flex-1">
                   Create Goal
                 </Button>

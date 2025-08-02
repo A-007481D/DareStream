@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Stream, Dare, ChatMessage } from '../types';
 import { supabase } from '../lib/supabase';
+import { useAuthStore } from './useAuthStore';
 
 interface StreamState {
   currentStream: Stream | null;
@@ -18,6 +19,10 @@ interface StreamState {
   fetchActiveStreams: () => Promise<void>;
   fetchTopDares: () => Promise<void>;
   searchStreams: (query: string) => void;
+  submitDare: (dare: Omit<Dare, 'id' | 'created_at' | 'votes' | 'status'>) => Promise<boolean>;
+  voteDare: (dareId: string, userId: string) => boolean;
+  approveDare: (dareId: string) => void;
+  rejectDare: (dareId: string) => void;
 }
 
 export const useStreamStore = create<StreamState>((set, get) => ({
@@ -63,5 +68,92 @@ export const useStreamStore = create<StreamState>((set, get) => ({
       stream.performer_name?.toLowerCase().includes(query.toLowerCase())
     );
     set({ searchResults: results });
+  },
+  submitDare: async (dareData) => {
+    const { deductTokens } = useAuthStore.getState();
+    
+    // Deduct tokens from user
+    const success = deductTokens(dareData.cost);
+    if (!success) {
+      return false;
+    }
+    
+    const newDare: Dare = {
+      ...dareData,
+      id: Date.now().toString(),
+      created_at: new Date().toISOString(),
+      votes: 0,
+      status: 'pending',
+    };
+    
+    // Store dare in localStorage for persistence
+    const existingDares = JSON.parse(localStorage.getItem('dares') || '[]');
+    existingDares.push(newDare);
+    localStorage.setItem('dares', JSON.stringify(existingDares));
+    
+    set((state) => ({
+      dares: [...state.dares, newDare]
+    }));
+    
+    return true;
+  },
+  voteDare: (dareId: string, userId: string) => {
+    const { deductTokens } = useAuthStore.getState();
+    
+    // Voting costs 10 tokens
+    const success = deductTokens(10);
+    if (!success) {
+      return false;
+    }
+    
+    set((state) => ({
+      dares: state.dares.map(dare => 
+        dare.id === dareId 
+          ? { ...dare, votes: dare.votes + 1, priority_score: (dare.priority_score || 0) + 10 }
+          : dare
+      )
+    }));
+    
+    // Update localStorage
+    const { dares } = get();
+    localStorage.setItem('dares', JSON.stringify(dares));
+    
+    return true;
+  },
+  approveDare: (dareId: string) => {
+    set((state) => ({
+      dares: state.dares.map(dare => 
+        dare.id === dareId 
+          ? { ...dare, status: 'approved' }
+          : dare
+      )
+    }));
+    
+    // Update localStorage
+    const { dares } = get();
+    localStorage.setItem('dares', JSON.stringify(dares));
+  },
+  rejectDare: (dareId: string) => {
+    const { updateTokens } = useAuthStore.getState();
+    
+    set((state) => {
+      const dare = state.dares.find(d => d.id === dareId);
+      if (dare) {
+        // Refund tokens to the user who submitted the dare
+        updateTokens(dare.cost);
+      }
+      
+      return {
+        dares: state.dares.map(d => 
+          d.id === dareId 
+            ? { ...d, status: 'rejected' }
+            : d
+        )
+      };
+    });
+    
+    // Update localStorage
+    const { dares } = get();
+    localStorage.setItem('dares', JSON.stringify(dares));
   },
 }));

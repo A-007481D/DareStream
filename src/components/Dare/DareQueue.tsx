@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Clock, Users, Zap, Check, X, Eye, MessageSquare, Heart, Timer, AlertCircle } from 'lucide-react';
 import { Dare, DareReaction } from '../../types';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useStreamStore } from '../../store/useStreamStore';
 import { Button } from '../ui/Button';
 
 interface DareQueueProps {
@@ -11,12 +12,24 @@ interface DareQueueProps {
 
 export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = false }) => {
   const { user } = useAuthStore();
+  const { voteDare, approveDare, rejectDare } = useStreamStore();
   const [dares, setDares] = useState<Dare[]>([]);
   const [selectedTab, setSelectedTab] = useState<'pending' | 'approved' | 'active' | 'completed'>('pending');
   const [votedDares, setVotedDares] = useState<Set<string>>(new Set());
 
+  // Load dares from localStorage on component mount
+  useEffect(() => {
+    const storedDares = JSON.parse(localStorage.getItem('dares') || '[]');
+    const streamDares = storedDares.filter((dare: Dare) => dare.stream_id === streamId);
+    setDares(streamDares);
+  }, [streamId]);
+
   // Mock data for demonstration
   useEffect(() => {
+    // Only add mock data if no dares exist
+    const storedDares = JSON.parse(localStorage.getItem('dares') || '[]');
+    if (storedDares.length > 0) return;
+    
     const mockDares: Dare[] = [
       {
         id: '1',
@@ -78,6 +91,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
       }
     ];
     setDares(mockDares);
+    localStorage.setItem('dares', JSON.stringify(mockDares));
   }, [streamId]);
 
   const getDifficultyColor = (difficulty: string) => {
@@ -92,12 +106,17 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
   const handleVote = (dareId: string) => {
     if (!user || votedDares.has(dareId)) return;
     
-    setDares(prev => prev.map(dare => 
-      dare.id === dareId 
-        ? { ...dare, votes: dare.votes + 1, priority_score: (dare.priority_score || 0) + 10 }
-        : dare
-    ));
-    setVotedDares(prev => new Set([...prev, dareId]));
+    const success = voteDare(dareId, user.id);
+    if (success) {
+      setDares(prev => prev.map(dare => 
+        dare.id === dareId 
+          ? { ...dare, votes: dare.votes + 1, priority_score: (dare.priority_score || 0) + 10 }
+          : dare
+      ));
+      setVotedDares(prev => new Set([...prev, dareId]));
+    } else {
+      alert('Insufficient tokens to vote! Voting costs 10 tokens.');
+    }
   };
 
   const handleContribute = (dareId: string, amount: number) => {
@@ -120,6 +139,12 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
 
   const handleModeration = (dareId: string, action: 'approve' | 'reject', notes?: string) => {
     if (!isStreamer) return;
+    
+    if (action === 'approve') {
+      approveDare(dareId);
+    } else {
+      rejectDare(dareId);
+    }
     
     setDares(prev => prev.map(dare => 
       dare.id === dareId 
@@ -156,24 +181,25 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
   ];
 
   return (
-    <div className="bg-gray-900 rounded-lg p-6">
+    <div className="h-full flex flex-col p-3 sm:p-4">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-bold text-white">Dare Queue</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-white">Dare Queue</h2>
         {isStreamer && (
-          <div className="flex items-center space-x-2 text-sm text-gray-400">
-            <AlertCircle className="w-4 h-4" />
-            <span>Streamer Controls Active</span>
+          <div className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm text-gray-400">
+            <AlertCircle className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Streamer Controls</span>
+            <span className="sm:hidden">Controls</span>
           </div>
         )}
       </div>
 
       {/* Tabs */}
-      <div className="flex space-x-1 mb-6 bg-gray-800 rounded-lg p-1">
+      <div className="flex space-x-1 mb-4 sm:mb-6 bg-gray-800 rounded-lg p-1 flex-shrink-0">
         {tabs.map(tab => (
           <button
             key={tab.key}
             onClick={() => setSelectedTab(tab.key as any)}
-            className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`flex-1 px-2 sm:px-4 py-2 rounded-lg font-medium transition-colors text-xs sm:text-sm ${
               selectedTab === tab.key
                 ? 'bg-red-600 text-white'
                 : 'text-gray-300 hover:text-white hover:bg-gray-700'
@@ -181,7 +207,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
           >
             {tab.label}
             {tab.count > 0 && (
-              <span className="ml-2 bg-gray-600 text-xs px-2 py-0.5 rounded-full">
+              <span className="ml-1 sm:ml-2 bg-gray-600 text-xs px-1 sm:px-2 py-0.5 rounded-full">
                 {tab.count}
               </span>
             )}
@@ -190,11 +216,11 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
       </div>
 
       {/* Dare List */}
-      <div className="space-y-4">
+      <div className="flex-1 overflow-y-auto space-y-3 sm:space-y-4 min-h-0">
         {filteredDares.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
-            <div className="text-lg mb-2">No {selectedTab} dares</div>
-            <p className="text-sm">
+          <div className="text-center py-6 sm:py-8 text-gray-400">
+            <div className="text-base sm:text-lg mb-2">No {selectedTab} dares</div>
+            <p className="text-xs sm:text-sm">
               {selectedTab === 'pending' && 'Waiting for new dare submissions...'}
               {selectedTab === 'approved' && 'No approved dares ready to activate.'}
               {selectedTab === 'active' && 'No dares currently in progress.'}
@@ -203,31 +229,33 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
           </div>
         ) : (
           filteredDares.map(dare => (
-            <div key={dare.id} className="bg-gray-800 rounded-lg p-4 border border-gray-700">
+            <div key={dare.id} className="bg-gray-800 rounded-lg p-3 sm:p-4 border border-gray-700">
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <div className="flex items-center space-x-3 mb-2">
-                    <h3 className="text-white font-bold text-lg">{dare.title}</h3>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(dare.difficulty)}`}>
+                  <div className="flex flex-col sm:flex-row sm:items-center space-y-1 sm:space-y-0 sm:space-x-3 mb-2">
+                    <h3 className="text-white font-bold text-sm sm:text-lg">{dare.title}</h3>
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColor(dare.difficulty)}`}>
                       {dare.difficulty.toUpperCase()}
                     </span>
-                    {dare.time_limit && (
-                      <div className="flex items-center text-gray-400 text-xs">
+                      {dare.time_limit && (
+                        <div className="flex items-center text-gray-400 text-xs">
                         <Timer className="w-3 h-3 mr-1" />
                         {dare.time_limit}min limit
                       </div>
-                    )}
+                      )}
+                    </div>
                   </div>
-                  <p className="text-gray-300 mb-3">{dare.description}</p>
+                  <p className="text-gray-300 mb-2 sm:mb-3 text-xs sm:text-sm">{dare.description}</p>
                   
-                  <div className="flex items-center space-x-4 text-sm text-gray-400 mb-3">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-400 mb-2 sm:mb-3">
                     <span>By {dare.created_by_username}</span>
                     <div className="flex items-center">
-                      <Users className="w-4 h-4 mr-1" />
+                      <Users className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                       {dare.votes} votes
                     </div>
                     <div className="flex items-center">
-                      <Zap className="w-4 h-4 mr-1 text-yellow-400" />
+                      <Zap className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-yellow-400" />
                       {dare.total_contributions || dare.cost} tokens
                     </div>
                     {dare.priority_score && (
@@ -275,7 +303,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
                 </div>
 
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-yellow-400 mb-2">
+                  <div className="text-lg sm:text-2xl font-bold text-yellow-400 mb-1 sm:mb-2">
                     {dare.total_contributions || dare.cost}
                   </div>
                   <div className="text-xs text-gray-400">tokens</div>
@@ -283,8 +311,8 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-3 border-t border-gray-700">
-                <div className="flex items-center space-x-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between pt-3 border-t border-gray-700 space-y-2 sm:space-y-0">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   {/* Viewer Actions */}
                   {!isStreamer && user && (
                     <>
@@ -293,7 +321,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
                         variant="outline"
                         onClick={() => handleVote(dare.id)}
                         disabled={votedDares.has(dare.id)}
-                        className="text-xs"
+                        className="text-xs px-2 py-1"
                       >
                         <Users className="w-3 h-3 mr-1" />
                         {votedDares.has(dare.id) ? 'Voted' : 'Vote'}
@@ -303,7 +331,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
                         size="sm"
                         variant="outline"
                         onClick={() => handleContribute(dare.id, 50)}
-                        className="text-xs bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
+                        className="text-xs px-2 py-1 bg-yellow-600/10 border-yellow-600/30 text-yellow-400 hover:bg-yellow-600/20"
                       >
                         <Zap className="w-3 h-3 mr-1" />
                         +50 Tokens
@@ -319,7 +347,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
                           <Button
                             size="sm"
                             onClick={() => handleModeration(dare.id, 'approve')}
-                            className="text-xs bg-green-600 hover:bg-green-700"
+                            className="text-xs px-2 py-1 bg-green-600 hover:bg-green-700"
                           >
                             <Check className="w-3 h-3 mr-1" />
                             Approve
@@ -328,7 +356,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
                             size="sm"
                             variant="outline"
                             onClick={() => handleModeration(dare.id, 'reject')}
-                            className="text-xs border-red-600/30 text-red-400 hover:bg-red-600/20"
+                            className="text-xs px-2 py-1 border-red-600/30 text-red-400 hover:bg-red-600/20"
                           >
                             <X className="w-3 h-3 mr-1" />
                             Reject
@@ -340,7 +368,7 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
                         <Button
                           size="sm"
                           onClick={() => handleActivate(dare.id)}
-                          className="text-xs"
+                          className="text-xs px-2 py-1"
                         >
                           <Zap className="w-3 h-3 mr-1" />
                           Start Dare
@@ -350,8 +378,8 @@ export const DareQueue: React.FC<DareQueueProps> = ({ streamId, isStreamer = fal
                   )}
                 </div>
 
-                <div className="flex items-center space-x-2 text-xs text-gray-400">
-                  <Clock className="w-3 h-3" />
+                <div className="flex items-center justify-end space-x-1 sm:space-x-2 text-xs text-gray-400">
+                  <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
                   {new Date(dare.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
