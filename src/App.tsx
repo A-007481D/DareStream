@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout/Layout';
 import { Home } from './pages/Home';
@@ -16,6 +16,12 @@ function App() {
 
   useEffect(() => {
     initialize();
+    
+    // Cleanup function to handle component unmount
+    return () => {
+      // This will run when the component unmounts
+      // You can add any cleanup code here if needed
+    };
   }, [initialize]);
 
   if (loading) {

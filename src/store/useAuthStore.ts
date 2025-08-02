@@ -41,16 +41,25 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
   logout: async () => {
     try {
-      // Clear the user state immediately to prevent any UI flicker
-      set({ user: null });
-      // Then sign out from Supabase
-      await supabase.auth.signOut();
-      // Force a full page reload to clear any state that might trigger API calls
-      window.location.href = '/';
+      // 1. First, clear any pending requests or subscriptions
+      // 2. Then clear the user state
+      set({ user: null, loading: false });
+      
+      // 3. Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) throw error;
+      
+      // 4. Clear any local storage that might contain auth state
+      localStorage.removeItem('sb-uesrkefrhfiszpxtdhyd-auth-token');
+      
+      // 5. Force a full page reload to clear all state
+      // Using window.location.replace() to prevent the back button from working
+      window.location.replace('/');
     } catch (error) {
-      console.error('Error logging out:', error);
-      // Still redirect even if there's an error
-      window.location.href = '/';
+      console.error('Error during logout:', error);
+      // Still force redirect even if there was an error
+      window.location.replace('/');
     }
   },
 }));

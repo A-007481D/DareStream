@@ -12,11 +12,13 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
     "agora-rtc-sdk-ng": "^4.19.0",
+    "clsx": "^2.1.1",
     "framer-motion": "^10.16.16",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.20.1",
+    "tailwind-merge": "^3.3.1",
     "zustand": "^4.4.7"
   },
   "devDependencies": {

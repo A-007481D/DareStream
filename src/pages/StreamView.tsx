@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Eye, Heart, Share, Gift, Users, ArrowLeft, UserPlus, UserCheck } from 'lucide-react';
+import { Eye, Share, Gift, ArrowLeft, UserPlus, UserCheck } from 'lucide-react';
 import { ChatBox } from '../components/Chat/ChatBox';
 import { DareSubmissionModal } from '../components/Dare/DareSubmissionModal';
 import { StreamReactions } from '../components/Stream/StreamReactions';
@@ -16,7 +16,7 @@ export const StreamView: React.FC = () => {
   const [tipMessage, setTipMessage] = useState('');
   const [isFollowing, setIsFollowing] = useState(false);
 
-  const { currentStream, setCurrentStream, chatMessages } = useStreamStore();
+  const { currentStream, setCurrentStream } = useStreamStore();
   const { user } = useAuthStore();
 
   useEffect(() => {
